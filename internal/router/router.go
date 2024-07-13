@@ -1,12 +1,12 @@
 package router
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"html/template"
 	"io"
 	"net/http"
 	"path"
+	"xo/internal/auth"
+	"xo/internal/cache"
 	"xo/internal/db"
 	"xo/internal/repository"
 
@@ -20,6 +20,8 @@ type Template struct {
 }
 
 func Router(echo *echo.Echo) {
+	cache.InitCache()
+
 	e = echo
 
 	e.GET("/", GetPlayground)
@@ -32,16 +34,23 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
+// Get page with playground
 func GetPlayground(c echo.Context) error {
+	if !repository.IsAuth {
+		return c.Redirect(http.StatusMovedPermanently, "/login")
+	}
+
 	path := path.Join("../", "public", "html", "playground.html")
 	tmpl := &Template{
 		templates: template.Must(template.ParseGlob(path)),
 	}
 	e.Renderer = tmpl
 
+	repository.IsAuth = false
 	return c.Render(http.StatusOK, "playground", "")
 }
 
+// Get login page
 func LoginPage(c echo.Context) error {
 	path := path.Join("../", "public", "html", "login.html")
 	tmpl := &Template{
@@ -56,6 +65,7 @@ func LoginPage(c echo.Context) error {
 	return c.Render(http.StatusOK, "login", LoginMessage)
 }
 
+// Login process
 func Login(c echo.Context) error {
 	db := db.InitDbConn()
 	defer db.Close()
@@ -64,30 +74,10 @@ func Login(c echo.Context) error {
 		Message string `json:"message"`
 	}
 
-	login := c.FormValue("login")
-	password := c.FormValue("password")
-	if login == "" || password == "" {
-		LoginMessage.Message = "Login or Password ot entered"
-
-		return c.Render(http.StatusOK, "login", LoginMessage)
+	LoginMessage.Message = auth.Login(c.FormValue("login"), c.FormValue("password"), c)
+	if repository.IsAuth {
+		return c.Redirect(http.StatusMovedPermanently, "/")
 	}
 
-	var user repository.User
-	hash := md5.Sum([]byte(password))
-	hashedPass := hex.EncodeToString(hash[:])
-
-	row := db.QueryRow(
-		"SELECT id, login, hashed_password FROM `users` WHERE login = ? and hashed_password = ?",
-		login,
-		hashedPass,
-	)
-	err := row.Scan(&user.Id, &user.Login, &user.HashedPassword)
-	if err != nil {
-		// err = fmt.Errorf("failed to query data: %w", err)
-		LoginMessage.Message = "Incorrect login or password"
-
-		return c.Render(http.StatusOK, "login", LoginMessage)
-	}
-
-	return c.Redirect(http.StatusMovedPermanently, "/")
+	return c.Render(http.StatusOK, "login", LoginMessage)
 }
