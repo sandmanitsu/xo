@@ -36,7 +36,7 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 
 // Get page with playground
 func GetPlayground(c echo.Context) error {
-	if !repository.IsAuth {
+	if !auth.ReadCookie(c) {
 		return c.Redirect(http.StatusMovedPermanently, "/login")
 	}
 

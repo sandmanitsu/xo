@@ -3,6 +3,7 @@ package auth
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -42,19 +43,35 @@ func Login(login string, password string, c echo.Context) string {
 }
 
 // Cached user and set cockie
-// expiration time = 1 hour
+// expiration time (cookie) = 1 hour
 func cacheUser(user repository.User, c echo.Context) {
 	token := user.Login + user.HashedPassword
 	hashToken := md5.Sum([]byte(token))
 	hashedToken := hex.EncodeToString(hashToken[:])
 	cache.Cache[hashedToken] = user
 
-	expiration := time.Now().Add(60 * time.Minute)
+	expiration := time.Now().Add(360 * time.Minute)
+	fmt.Println(expiration)
 	cookie := http.Cookie{
-		Name:    "tokem",
+		Name:    "auth",
 		Value:   url.QueryEscape(hashedToken),
 		Expires: expiration,
 	}
 
 	c.SetCookie(&cookie)
+}
+
+// todo Fix 500 when cookie is empty
+// todo fix server time
+func ReadCookie(c echo.Context) bool {
+	cookie, err := c.Cookie("auth")
+	if err != nil {
+		panic(err)
+	}
+
+	if cookie.Value == "" {
+		return false
+	}
+
+	return true
 }
