@@ -4,15 +4,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/style.css">
     <title>Xo Login</title>
 </head>
 <body>
+    <h2>Enter your login and pass</h2>
+
     <form id="loginForm" name="loginForm" action="/login" method="post" class="mt-4">
-        <label for="login">Логин</label>
+        <label for="login">Login</label>
+        <br>
         <input type="login" id="login" name="login" autocomplete="on">
-        <label for="password">Пароль</label>
+        <br>
+        <label for="password">Password</label>
+        <br>
         <input type="password" id="password" name="password" autocomplete="on">
-        <button type="submit" name="submitBtn">Войти</button>
+        <br>
+        <button type="submit" name="submitBtn">Log in</button>
+    </form>
+
+    <form id="signBtnForm" name="signBtnForm" action="/signup" method="get" class="mt-4">
+        <button type="submit" name="submitBtn">Sign up</button>
     </form>
 
     {{if . }}

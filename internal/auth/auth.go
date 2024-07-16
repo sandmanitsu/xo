@@ -36,22 +36,20 @@ func Login(login string, password string, c echo.Context) string {
 		return "Incorrect login or password"
 	}
 
-	cacheUser(user, c)
+	CacheUser(user, c)
 
-	repository.IsAuth = true
 	return ""
 }
 
 // Cached user and set cockie
-// expiration time (cookie) = 1 hour
-func cacheUser(user repository.User, c echo.Context) {
+// expiration time (cookie) = 6 hour
+func CacheUser(user repository.User, c echo.Context) {
 	token := user.Login + user.HashedPassword
 	hashToken := md5.Sum([]byte(token))
 	hashedToken := hex.EncodeToString(hashToken[:])
 	cache.Cache[hashedToken] = user
 
 	expiration := time.Now().Add(360 * time.Minute)
-	fmt.Println(expiration)
 	cookie := http.Cookie{
 		Name:    "auth",
 		Value:   url.QueryEscape(hashedToken),
@@ -61,17 +59,67 @@ func cacheUser(user repository.User, c echo.Context) {
 	c.SetCookie(&cookie)
 }
 
+// Read a cookie
 // todo Fix 500 when cookie is empty
 // todo fix server time
 func ReadCookie(c echo.Context) bool {
 	cookie, err := c.Cookie("auth")
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+
+		return false
 	}
 
 	if cookie.Value == "" {
 		return false
 	}
 
+	fmt.Println(cache.Cache)
+
 	return true
+}
+
+// Delete cookie and cache
+func DeleteCacheAndCookie(c echo.Context) {
+	cookie, err := c.Cookie("auth")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	delete(cache.Cache, cookie.Value)
+
+	emptyCookie := http.Cookie{
+		Name:    "auth",
+		Value:   "",
+		Expires: time.Unix(0, 0),
+	}
+	c.SetCookie(&emptyCookie)
+}
+
+// add new user to db
+func AddNewUser(c echo.Context) string {
+	db := db.InitDbConn()
+	defer db.Close()
+
+	if c.FormValue("login") == "" || c.FormValue("password") == "" {
+		return "Login Or Password not entered"
+	}
+
+	hash := md5.Sum([]byte(c.FormValue("password")))
+	hashedPass := hex.EncodeToString(hash[:])
+
+	var user repository.User
+	user.Login = c.FormValue("login")
+	user.HashedPassword = hashedPass
+
+	_, err := db.Exec(`INSERT INTO users (login, hashed_password) values (?, ?)`, user.Login, user.HashedPassword)
+	if err != nil {
+		fmt.Println(err)
+
+		return fmt.Sprintln("Error: %w", err)
+	}
+
+	CacheUser(user, c)
+
+	return ""
 }

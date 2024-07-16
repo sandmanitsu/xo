@@ -31,3 +31,12 @@ body {
 .column:hover {
     border: solid rgb(0, 134, 42);
 }
+
+.logout {
+    margin-top: 20px;
+}
+
+button {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
