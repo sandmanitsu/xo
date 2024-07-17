@@ -46,6 +46,29 @@ function ActionListener() {
     })
 }
 
+function WebSocketConn() {
+    var conn;
+    var btn = document.getElementById('websocket')
+
+    btn.addEventListener('click', function() {
+        conn.send('server')
+    })
+
+    if (window["WebSocket"]) {
+        conn = new WebSocket("ws://" + document.location.host + "/ws");
+        conn.onclose = function(evt) {
+            console.log('connection closed!');
+        }
+        conn.onmessage = function(evt) {
+            console.log('have a response');
+            console.log(evt.data);
+        }
+    } else {
+        console.log('doest support websocket');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     ActionListener()
+    // WebSocketConn()
 }, false);

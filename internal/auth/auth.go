@@ -74,6 +74,11 @@ func ReadCookie(c echo.Context) bool {
 		return false
 	}
 
+	_, exist := cache.Cache[cookie.Value]
+	if !exist {
+		return false
+	}
+
 	fmt.Println(cache.Cache)
 
 	return true

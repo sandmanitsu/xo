@@ -1,0 +1,22 @@
+{{define "rooms"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/style.css">
+    <title>Rooms</title>
+</head>
+<body>
+    <h2>{{.Name}}, Create or pick a room!</h2>
+
+    <form id="createRoomForm" name="createRoomForm" action="/createRoom" method="post" >
+        <button type="submit" name="submitBtn">Create!</button>
+    </form>
+
+    <div>
+        Rooms...
+    </div>
+</body>
+</html>
+{{end}}
