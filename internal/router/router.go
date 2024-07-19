@@ -8,6 +8,7 @@ import (
 	"xo/internal/auth"
 	"xo/internal/cache"
 	"xo/internal/db"
+	"xo/internal/ws"
 
 	"github.com/labstack/echo/v4"
 )
@@ -20,6 +21,10 @@ type Template struct {
 
 func Router(echo *echo.Echo) {
 	cache.InitCache()
+
+	hub := ws.NewHub()
+	wsHandler := ws.NewHandler(hub)
+	go hub.Run()
 
 	e = echo
 
@@ -34,6 +39,11 @@ func Router(echo *echo.Echo) {
 	e.POST("/signup", Sighup)
 
 	e.GET("/rooms", RoomsPage)
+
+	e.POST("/ws/createRoom", wsHandler.CreateRoom)
+	e.GET("/ws/joinRoom/:roomId", wsHandler.JoinRoom)
+	e.GET("/ws/getRooms", wsHandler.GetRooms)
+	e.GET("/ws/getClients", wsHandler.GetClients)
 
 	// e.GET("/ws", WebSocket)
 }

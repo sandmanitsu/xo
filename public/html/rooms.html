@@ -5,17 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/rooms.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <title>Rooms</title>
 </head>
 <body>
     <h2>{{.Name}}, Create or pick a room!</h2>
 
-    <form id="createRoomForm" name="createRoomForm" action="/createRoom" method="post" >
-        <button type="submit" name="submitBtn">Create!</button>
-    </form>
+    <button class="createBtn" name="submitBtn">Create!</button>
+    <button class="updateBtn" name="updateBtn">Update...</button>
 
-    <div>
-        Rooms...
+    <div class="rooms">
+        <!-- adding rooms here -->
     </div>
 </body>
 </html>
