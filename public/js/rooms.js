@@ -35,18 +35,24 @@ function getRooms() {
         url: '/ws/getRooms',
         success: function(data) {
             data.forEach(function(item) {
-                $('.rooms').append(htmlRoom(item.id, item.name))
+                console.log(item);
+                $('.rooms').append(htmlRoom(item.id, item.name, item.clientsAmount))
             });
         }
     });
 }
 
 // return room html
-function htmlRoom(id, name) {
+function htmlRoom(id, name, clientsAmount) {
     clientId = $('h2').attr('clientid')
     username = $('h2').attr('username')
 
-    return '<div class="room" id="'+ id + '"><div class="room_name">' + name + '</div><form action="/login/'+ id + '/' + clientId + '/' + username + '" method="get"><button class="room_btn" roomId="' + id + '">Join!</button></form></div>'
+    htmlButton = '<form action="/login/'+ id + '/' + clientId + '/' + username + '" method="get"><button class="room_btn" roomId="' + id + '">Join!</button></form>'
+    if (clientsAmount >= 2) {
+        htmlButton = '<button class="room_btn">Room is full!</button>'
+    }
+
+    return '<div class="room" id="'+ id + '"><div class="room_name">' + name + '</div>' + htmlButton + '</div>'
 }
 
 function updateRoomList() {

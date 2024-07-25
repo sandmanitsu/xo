@@ -8,6 +8,7 @@ import (
 type Playground struct {
 	Turn     string `json:"turn"`
 	Username string `json:"username"`
+	UserTurn string `json:"userTurn"`
 	Row1     Row1   `json:"row1"`
 	Row2     Row2   `json:"row2"`
 	Row3     Row3   `json:"row3"`

@@ -35,7 +35,7 @@ func (h *Handler) CreateRoom(c echo.Context) error {
 		Id:         req.Id,
 		Name:       req.Name,
 		Clients:    make(map[string]*Client),
-		Playground: "",
+		Playground: "{\"turn\":\"X\",\"username\":\"\",\"userTurn\":\"\",\"row1\":{\"a\":\"\",\"b\":\"\",\"c\":\"\"},\"row2\":{\"a\":\"\",\"b\":\"\",\"c\":\"\"},\"row3\":{\"a\":\"\",\"b\":\"\",\"c\":\"\"}}",
 	}
 
 	return c.JSON(http.StatusOK, req)
@@ -90,8 +90,9 @@ func (h *Handler) JoinRoom(c echo.Context) error {
 }
 
 type RoomResponse struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
+	Id            string `json:"id"`
+	Name          string `json:"name"`
+	ClientsAmount int    `json:"clientsAmount"`
 }
 
 func (h *Handler) GetRooms(c echo.Context) error {
@@ -99,8 +100,9 @@ func (h *Handler) GetRooms(c echo.Context) error {
 
 	for _, r := range h.hub.Rooms {
 		rooms = append(rooms, RoomResponse{
-			Id:   r.Id,
-			Name: r.Name,
+			Id:            r.Id,
+			Name:          r.Name,
+			ClientsAmount: len(r.Clients),
 		})
 	}
 

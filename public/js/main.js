@@ -1,5 +1,6 @@
 var data = {
     turn: '',
+    userTurn: '',
     username: '',
     row1: {
         a: '',
@@ -21,16 +22,22 @@ var data = {
 // ws connect
 var conn;
 
+var turn;
 var roomId;
 var clientId;
 var username;
 
 function ActionListener() {
     cells = $('.column')
-    var turn = 'X'
 
     cells.each(function(index) {
         $(this).on('click', function () {
+            // console.log(data);
+            // if (data.userTurn != username) {
+            //     console.log('locked for ' + username);
+            //     return;
+            // }
+
             className = $(this).attr('class')
             row = className.slice(7,11);
             cell = className.slice(12);
@@ -60,16 +67,21 @@ function ActionListener() {
     })
 }
 
-function checkIfTwoUserInTheRoom(data) {
-    data = JSON.parse(data);
-
-    if (data['content'] == 'A new user join the room') {
+function startGame(message) {
+    if (message == 'A new user join the room') {
         $.ajax({
             method: 'get',
-            url: '/ws/getClients/' + data['roomId'],
-            success: function(data) {
-                if (data.length == 2) {
-                    console.log('game start!');
+            url: '/ws/getClients/' + roomId,
+            success: function(clients) {
+                clientsList = clients
+
+                if (clients.length == 2) {
+                    $('.message-app').append('<div>Game started!' + getDateForMessage() + '</div>')
+                    $('.message-app').append('<div>' + clients[0].user + ' you turn first! -_-' + getDateForMessage() + '</div>')
+
+                    data.userTurn = clients[0].user
+
+                    conn.send(JSON.stringify(data))
                 }
             }
         });
@@ -117,12 +129,26 @@ function syncPlayground() {
     }
 }
 
-function WebSocketConn() {
-    console.log(window.location.pathname);
+function getDateForMessage() {
+    date = new Date();
 
+    return ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds()
+}
+
+function addNewUserHtml(username) {
+    date = new Date();
+
+    html = '<div>' + username + ' joined the room!' + getDateForMessage() + '</div>'
+
+    $('.message-app').append(html)
+}
+
+function WebSocketConn() {
     roomId = window.location.pathname.split('/')[2]
     clientId = window.location.pathname.split('/')[3]
     username = window.location.pathname.split('/')[4]
+
+    $('.user').append('<div>' + username + '</div>')
 
     if (window["WebSocket"]) {
         conn = new WebSocket("ws://" + document.location.host + "/ws/joinRoom/" + roomId + "?userId= " + clientId + "&user=" + username);
@@ -133,10 +159,19 @@ function WebSocketConn() {
             console.log('have a response');
 
             response =  JSON.parse(evt.data)
-            data = JSON.parse(response.playground)
+            console.log(response);
 
-            checkIfTwoUserInTheRoom(evt.data)
+            if (response.content == 'A new user join the room') {
+                addNewUserHtml(response.user)
+            }
+
+            data = JSON.parse(response.playground)
+            turn = data.turn
+            $('.turn').html(turn)
+
+            startGame(response.content);
             syncPlayground()
+
             console.log(data);
         }
     } else {

@@ -29,10 +29,8 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case cl := <-h.Register:
-			// fmt.Println("Try to Register new client")
 			if _, ok := h.Rooms[cl.RoomId]; ok {
-				//todo max 2 user in the room
-				// fmt.Printf("\nRoom - %v:exist", cl.RoomId)
+				//todo max 2 user in the room???
 				if _, ok := h.Rooms[cl.RoomId].Clients[cl.Id]; ok {
 					if len(h.Rooms[cl.RoomId].Clients) != 0 {
 						h.Broadcast <- &Message{
