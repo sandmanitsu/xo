@@ -15,9 +15,10 @@ type Client struct {
 }
 
 type Message struct {
-	Content string `json:"content"`
-	RoomId  string `json:"roomId"`
-	User    string `json:"user"`
+	Content    string `json:"content"`
+	RoomId     string `json:"roomId"`
+	User       string `json:"user"`
+	Playground string `json:"playground"`
 }
 
 func (c *Client) WriteMessage() {
@@ -51,10 +52,13 @@ func (c *Client) ReadMessage(hub *Hub) {
 			break
 		}
 
+		UpdatePlayground(m, c.RoomId, hub)
+
 		msg := &Message{
-			Content: string(m),
-			RoomId:  c.RoomId,
-			User:    c.User,
+			Content:    string(m),
+			RoomId:     c.RoomId,
+			User:       c.User,
+			Playground: hub.Rooms[c.RoomId].Playground,
 		}
 
 		hub.Broadcast <- msg

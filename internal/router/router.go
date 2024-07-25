@@ -28,7 +28,7 @@ func Router(echo *echo.Echo) {
 
 	e = echo
 
-	e.GET("/", GetPlayground)
+	e.GET("/:roomId/:clientId/:user", GetPlayground)
 
 	e.GET("/login", LoginPage)
 	e.POST("/login", Login)
@@ -43,7 +43,7 @@ func Router(echo *echo.Echo) {
 	e.POST("/ws/createRoom", wsHandler.CreateRoom)
 	e.GET("/ws/joinRoom/:roomId", wsHandler.JoinRoom)
 	e.GET("/ws/getRooms", wsHandler.GetRooms)
-	e.GET("/ws/getClients", wsHandler.GetClients)
+	e.GET("/ws/getClients/:roomId", wsHandler.GetClients)
 
 	// e.GET("/ws", WebSocket)
 }
@@ -54,9 +54,9 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 
 // Get page with playground
 func GetPlayground(c echo.Context) error {
-	if !auth.ReadCookie(c) {
-		return c.Redirect(http.StatusMovedPermanently, "/login")
-	}
+	// if !auth.ReadCookie(c) {
+	// 	return c.Redirect(http.StatusMovedPermanently, "/login")
+	// }
 
 	path := path.Join("../", "public", "html", "playground.html")
 	tmpl := &Template{
@@ -83,6 +83,7 @@ func LoginPage(c echo.Context) error {
 }
 
 // Login process
+// http POST
 func Login(c echo.Context) error {
 	db := db.InitDbConn()
 	defer db.Close()
@@ -93,7 +94,7 @@ func Login(c echo.Context) error {
 
 	LoginMessage.Message = auth.Login(c.FormValue("login"), c.FormValue("password"), c)
 	if LoginMessage.Message == "" {
-		return c.Redirect(http.StatusMovedPermanently, "/")
+		return c.Redirect(http.StatusMovedPermanently, "/rooms")
 	}
 
 	return c.Render(http.StatusOK, "login", LoginMessage)
@@ -139,10 +140,12 @@ func RoomsPage(c echo.Context) error {
 	}
 
 	var Data struct {
+		Id   int    `json:"id"`
 		Name string `json:"name"`
 	}
 	cookie, _ := c.Cookie("auth")
 	Data.Name = cache.Cache[cookie.Value].Login
+	Data.Id = cache.Cache[cookie.Value].Id
 
 	path := path.Join("../", "public", "html", "rooms.html")
 	tmpl := &Template{

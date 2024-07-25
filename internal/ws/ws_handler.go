@@ -32,9 +32,10 @@ func (h *Handler) CreateRoom(c echo.Context) error {
 	}
 
 	h.hub.Rooms[req.Id] = &Room{
-		Id:      req.Id,
-		Name:    req.Name,
-		Clients: make(map[string]*Client),
+		Id:         req.Id,
+		Name:       req.Name,
+		Clients:    make(map[string]*Client),
+		Playground: "",
 	}
 
 	return c.JSON(http.StatusOK, req)
@@ -59,6 +60,8 @@ func (h *Handler) JoinRoom(c echo.Context) error {
 	clientId := c.QueryParam("userId")
 	user := c.QueryParam("user")
 
+	fmt.Printf("\nJoin room. User info: roomId = %v\ncliendId = %v\nuser = %v\n", roomId, clientId, user)
+
 	cl := &Client{
 		Conn:    conn,
 		Message: make(chan *Message, 10),
@@ -68,9 +71,10 @@ func (h *Handler) JoinRoom(c echo.Context) error {
 	}
 
 	m := &Message{
-		Content: "A new user join the room",
-		RoomId:  roomId,
-		User:    user,
+		Content:    "A new user join the room",
+		RoomId:     roomId,
+		User:       user,
+		Playground: h.hub.Rooms[roomId].Playground,
 	}
 
 	// rigester a new client through the register channel
@@ -112,6 +116,9 @@ func (h *Handler) GetClients(c echo.Context) error {
 	var Clients []ClientResponse
 
 	roomdId := c.Param("roomId")
+
+	// debug
+	fmt.Println(h.hub.Rooms, h.hub.Rooms[roomdId], len(h.hub.Rooms[roomdId].Clients))
 
 	if _, ok := h.hub.Rooms[roomdId]; !ok {
 		Clients = make([]ClientResponse, 0)

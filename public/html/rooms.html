@@ -10,7 +10,7 @@
     <title>Rooms</title>
 </head>
 <body>
-    <h2>{{.Name}}, Create or pick a room!</h2>
+    <h2 clientId="{{.Id}}" userName="{{.Name}}">{{.Name}}, Create or pick a room!</h2>
 
     <button class="createBtn" name="submitBtn">Create!</button>
     <button class="updateBtn" name="updateBtn">Update...</button>
@@ -18,6 +18,7 @@
     <div class="rooms">
         <!-- adding rooms here -->
     </div>
+
 </body>
 </html>
 {{end}}

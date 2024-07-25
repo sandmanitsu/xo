@@ -102,6 +102,7 @@ func DeleteCacheAndCookie(c echo.Context) {
 }
 
 // add new user to db
+// todo check for same login
 func AddNewUser(c echo.Context) string {
 	db := db.InitDbConn()
 	defer db.Close()

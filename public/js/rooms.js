@@ -43,7 +43,10 @@ function getRooms() {
 
 // return room html
 function htmlRoom(id, name) {
-    return '<div class="room" id="' + id + '"><div class="room_name">' + name + '</div><button class="room_btn">Join!</button></div>'
+    clientId = $('h2').attr('clientid')
+    username = $('h2').attr('username')
+
+    return '<div class="room" id="'+ id + '"><div class="room_name">' + name + '</div><form action="/login/'+ id + '/' + clientId + '/' + username + '" method="get"><button class="room_btn" roomId="' + id + '">Join!</button></form></div>'
 }
 
 function updateRoomList() {

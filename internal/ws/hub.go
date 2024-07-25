@@ -1,9 +1,12 @@
 package ws
 
+import "fmt"
+
 type Room struct {
-	Id      string             `json:"id"`
-	Name    string             `json:"name"`
-	Clients map[string]*Client `json:"client"`
+	Id         string             `json:"id"`
+	Name       string             `json:"name"`
+	Clients    map[string]*Client `json:"client"`
+	Playground string             `json:"playground"`
 }
 
 type Hub struct {
@@ -26,7 +29,10 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case cl := <-h.Register:
+			// fmt.Println("Try to Register new client")
 			if _, ok := h.Rooms[cl.RoomId]; ok {
+				//todo max 2 user in the room
+				// fmt.Printf("\nRoom - %v:exist", cl.RoomId)
 				if _, ok := h.Rooms[cl.RoomId].Clients[cl.Id]; ok {
 					if len(h.Rooms[cl.RoomId].Clients) != 0 {
 						h.Broadcast <- &Message{
@@ -35,16 +41,20 @@ func (h *Hub) Run() {
 							User:    cl.User,
 						}
 					}
-					r := h.Rooms[cl.RoomId]
-
-					if _, ok := r.Clients[cl.Id]; !ok {
-						r.Clients[cl.Id] = cl
-					}
 				}
+				r := h.Rooms[cl.RoomId]
+
+				if _, ok := r.Clients[cl.Id]; !ok {
+					r.Clients[cl.Id] = cl
+				}
+				fmt.Println("\nClient registreted")
+				// fmt.Println(h.Rooms[cl.RoomId].Clients)
 			}
 		case cl := <-h.Unregister:
 			if _, ok := h.Rooms[cl.RoomId]; ok {
 				if _, ok := h.Rooms[cl.RoomId].Clients[cl.Id]; ok {
+					fmt.Println("Remove user from room")
+
 					delete(h.Rooms[cl.RoomId].Clients, cl.Id)
 					close(cl.Message)
 				}
