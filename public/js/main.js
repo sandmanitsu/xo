@@ -1,4 +1,5 @@
-var data = {
+var clearData = {
+    winner: '',
     turn: '',
     userTurn: '',
     username: '',
@@ -32,11 +33,10 @@ function ActionListener() {
 
     cells.each(function(index) {
         $(this).on('click', function () {
-            // console.log(data);
-            // if (data.userTurn != username) {
-            //     console.log('locked for ' + username);
-            //     return;
-            // }
+            if (data.userTurn != username) {
+                console.log('locked for ' + username);
+                return;
+            }
 
             className = $(this).attr('class')
             row = className.slice(7,11);
@@ -159,13 +159,19 @@ function WebSocketConn() {
             console.log('have a response');
 
             response =  JSON.parse(evt.data)
-            console.log(response);
+            // console.log(response);
 
             if (response.content == 'A new user join the room') {
                 addNewUserHtml(response.user)
             }
 
             data = JSON.parse(response.playground)
+
+            if (data.winner) {
+                html = '<div>' + data.winner + ' win a match!' + getDateForMessage() + '</div>'
+                $('.message-app').append(html)
+            }
+
             turn = data.turn
             $('.turn').html(turn)
 

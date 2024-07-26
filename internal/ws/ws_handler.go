@@ -35,7 +35,7 @@ func (h *Handler) CreateRoom(c echo.Context) error {
 		Id:         req.Id,
 		Name:       req.Name,
 		Clients:    make(map[string]*Client),
-		Playground: "{\"turn\":\"X\",\"username\":\"\",\"userTurn\":\"\",\"row1\":{\"a\":\"\",\"b\":\"\",\"c\":\"\"},\"row2\":{\"a\":\"\",\"b\":\"\",\"c\":\"\"},\"row3\":{\"a\":\"\",\"b\":\"\",\"c\":\"\"}}",
+		Playground: "{\"winner\":\"\",\"turn\":\"X\",\"username\":\"\",\"userTurn\":\"\",\"row1\":{\"a\":\"\",\"b\":\"\",\"c\":\"\"},\"row2\":{\"a\":\"\",\"b\":\"\",\"c\":\"\"},\"row3\":{\"a\":\"\",\"b\":\"\",\"c\":\"\"}}",
 	}
 
 	return c.JSON(http.StatusOK, req)
